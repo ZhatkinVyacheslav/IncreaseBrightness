@@ -9,8 +9,16 @@
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "shlwapi.lib")
 
+// Константы для путей
+const std::wstring INPUT_IMAGE_PATH = L"data/input.jpg";
+const std::wstring OUTPUT_DIR = L"result";
+const std::wstring OUTPUT_IMAGE_NAME = L"output.jpg";
+
+// Константы для обработки изображений
+const int BRIGHTNESS_ADJUSTMENT = 40;
+
 // Функция для увелечения яркости на заданное значение
-void IncreaseBrightness(Gdiplus::Bitmap* img, int brightnessValue) {
+void IncreaseBrightness(Gdiplus::Bitmap* img) {
 
     // Цикл по всем пикселям  
     for (int y = 0; y < img->GetHeight(); y++) {
@@ -19,9 +27,9 @@ void IncreaseBrightness(Gdiplus::Bitmap* img, int brightnessValue) {
             img->GetPixel(x, y, &pixel);
 
             // Увеличение каждого канала RGB на определённое значение 
-            int newR = std::min(255, static_cast<int>(pixel.GetR()) + brightnessValue);
-            int newG = std::min(255, static_cast<int>(pixel.GetG()) + brightnessValue);
-            int newB = std::min(255, static_cast<int>(pixel.GetB()) + brightnessValue);
+            int newR = std::min(255, static_cast<int>(pixel.GetR()) + BRIGHTNESS_ADJUSTMENT);
+            int newG = std::min(255, static_cast<int>(pixel.GetG()) + BRIGHTNESS_ADJUSTMENT);
+            int newB = std::min(255, static_cast<int>(pixel.GetB()) + BRIGHTNESS_ADJUSTMENT);
 
             // Запись нового цвета в пиксель
             img->SetPixel(x, y, Gdiplus::Color(
@@ -75,20 +83,20 @@ int main() {
     Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 
     // Загрузка изображении
-    Gdiplus::Bitmap* img = new Gdiplus::Bitmap(L"data/input.jpg");
+    Gdiplus::Bitmap* img = new Gdiplus::Bitmap(INPUT_IMAGE_PATH.c_str());
     if (!img || img->GetLastStatus() != Gdiplus::Ok) {
         std::cerr << "Failed to load image" << std::endl;
         return -1;
     }
 
     // Вызов функции для увелечения яркости на 40
-    IncreaseBrightness(img, 40);
+    IncreaseBrightness(img);
 
     // Получаение пути где будет сохранён результат 
     WCHAR buffer[MAX_PATH];
     GetModuleFileNameW(NULL, buffer, MAX_PATH);
     PathRemoveFileSpecW(buffer);
-    std::wstring outputPath = std::wstring(buffer) + L"\\result\\output.jpg";
+    std::wstring outputPath = std::wstring(buffer) + L"\\" + OUTPUT_DIR + L"\\" + OUTPUT_IMAGE_NAME;
 
     // Сохранение результата
     CLSID encoderClsid;
